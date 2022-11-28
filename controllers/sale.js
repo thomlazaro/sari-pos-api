@@ -279,6 +279,9 @@ exports.postSale = async(req,res,next) =>{
       today_total_profit:0,
       today_total_selling_price:0,
       today_total_price:0,
+      overall_total_profit:0,
+      overall_total_selling_price:0,
+      overall_total_price:0,
       total_profit:0,
       total_selling_price:0,
       total_price:0,
@@ -343,6 +346,25 @@ exports.postSale = async(req,res,next) =>{
       }
       if(result3[0][0].t_profit){
         resultObj.total_debt_profit = result3[0][0].t_profit;
+      }
+
+      //get overall total profit, selling price and price ON SALES TABLE
+      const result4 = await sequelize.query(
+        "SELECT SUM(total_selling_price) AS t_overall_selling_price"+
+        ",SUM(total_price) as t_overall_price"+
+        ",SUM((total_selling_price-total_price)) AS t_overall_profit"+
+        " FROM SALES WHERE"+
+        " debt=false"
+      )
+
+      if(result4[0][0].t_overall_selling_price){
+        resultObj.overall_total_selling_price = result4[0][0].t_overall_selling_price;
+      }
+      if(result4[0][0].t_overall_price){
+        resultObj.overall_total_price = result4[0][0].t_overall_price;
+      }
+      if(result4[0][0].t_overall_profit){
+        resultObj.overall_total_profit = result4[0][0].t_overall_profit;
       }
 
       //send resultObj as json response
