@@ -20,7 +20,7 @@ const getItemsPageCount = async(itemPerPage)=>{
 }
 
 exports.getItems = async(req, res, next) => {
-    let itemPerPage =10;//limit of 10 rows per page
+    let itemPerPage =12;//limit of 12 rows per page
     //const PAGE = req.query.page;
  
     try{

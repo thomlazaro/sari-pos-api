@@ -9,7 +9,7 @@ const getSalesPageCount = async() =>{
         let SalePageCount = 0;
         let totalDebtCount = 0;
         let DebtPageCount = 0;
-        let itemPerPage =10;//limit of 10 rows per page
+        let itemPerPage =12;//limit of 12 rows per page
         //const PAGE = 1;
 
         //get all sale count where debt = false
