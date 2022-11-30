@@ -163,7 +163,6 @@ exports.getItems = async(req, res, next) => {
       .then(result=>{
         console.log('Destroyed Item');
           getItemsPageCount(12).then(pageCount=>{
-            console.log('testxxxxxxxxxx'+pageCount);
             res.status(200).json({
               item_page_count:pageCount,
               success:true
