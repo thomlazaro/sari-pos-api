@@ -87,7 +87,7 @@ exports.getItems = async(req, res, next) => {
         });
 
         //console.log(result.dataValues);
-        const pageCount = await getItemsPageCount(10);
+        const pageCount = await getItemsPageCount(12);
         res.status(200).json({
             name: name,
             item_page_count:pageCount,
@@ -162,7 +162,8 @@ exports.getItems = async(req, res, next) => {
       })
       .then(result=>{
         console.log('Destroyed Item');
-          getItemsPageCount(10).then(pageCount=>{
+          getItemsPageCount(12).then(pageCount=>{
+            console.log('testxxxxxxxxxx'+pageCount);
             res.status(200).json({
               item_page_count:pageCount,
               success:true
