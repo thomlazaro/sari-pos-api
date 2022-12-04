@@ -1,10 +1,11 @@
 //npm modules
 const express = require('express');
-const bodyParser = require('body-parser');
 //routes
 const itemRoutes = require('./routes/item');
 const saleRoutes = require('./routes/sale');
 const userRoutes = require('./routes/user');
+//custom utilities
+const eventLog = require('./middleware/event-logger');
 //models
 const Item = require('./models/item');
 const Sale = require('./models/sale');
@@ -15,7 +16,7 @@ const sequelize = require('./util/database');
 const app = express();
 
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
-app.use(bodyParser.json()); // application/json
+app.use(express.json()); // application/json
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -23,6 +24,10 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 });
+
+//setup eventLog middleware
+app.use(eventLog.logEvent);
+
 //setup api endpoint routes
 app.use('/items',itemRoutes);
 app.use('/sales',saleRoutes);
