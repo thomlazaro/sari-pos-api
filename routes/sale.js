@@ -11,7 +11,7 @@ const router = express.Router();
 const validationArray = [
     body('items').isLength({min:1})
     .withMessage('Cannot create sale without items on cart!'),
-    body('sale_date').isLength({min:10})
+    body('sale_date').isLength({min:9})
     .withMessage('Sale date must be in MM/DD/YYYY format!'),
     body('total_item_count')
     .isInt()

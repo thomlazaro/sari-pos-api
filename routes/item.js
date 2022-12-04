@@ -43,7 +43,7 @@ const validationArray =   [
     })
     ,
     body('date_added')
-    .trim().isLength({min:10})
+    .trim().isLength({min:9})
     .withMessage('Date added must be in MM/DD//YYYY format!')
     ]
 
