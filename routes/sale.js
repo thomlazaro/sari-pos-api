@@ -48,6 +48,9 @@ router.get('/', isAuth,saleController.getSales);
 // POST /sales
 router.post('/',isAuth,validationArray,saleController.postSale);
 
+// POST /sales/order
+router.post('/order',validationArray,saleController.postOrder);
+
 // DELETE /sales
 router.delete('/',isAuth, saleController.deleteSale);
 

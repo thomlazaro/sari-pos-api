@@ -9,13 +9,15 @@ const getSalesPageCount = async() =>{
         let SalePageCount = 0;
         let totalDebtCount = 0;
         let DebtPageCount = 0;
+        let totalOrderCount = 0;
+        let OrderPageCount = 0;
         let itemPerPage =12;//limit of 12 rows per page
         //const PAGE = 1;
 
         //get all sale count where debt = false
         const result = await sequelize.query(
           "SELECT COUNT(id) AS sale_id"+
-          " FROM SALES WHERE debt=false"
+          " FROM SALES WHERE debt=false AND  order_ind=false"
         )
   
         if(result[0][0].sale_id){
@@ -26,7 +28,7 @@ const getSalesPageCount = async() =>{
         //get all sale count where debt = true
         const result2 = await sequelize.query(
           "SELECT COUNT(id) AS sale_id"+
-          " FROM SALES WHERE debt=true"
+          " FROM SALES WHERE debt=true AND  order_ind=false"
         )
   
         if(result2[0][0].sale_id){
@@ -34,7 +36,18 @@ const getSalesPageCount = async() =>{
           DebtPageCount = Math.ceil(totalDebtCount / itemPerPage);
         }
 
-        return {salePageCount:SalePageCount,debtPageCount:DebtPageCount}
+        //get all sale count where debt = true
+        const result3 = await sequelize.query(
+          "SELECT COUNT(id) AS sale_id"+
+          " FROM SALES WHERE order_ind=true"
+        )
+  
+        if(result3[0][0].sale_id){
+          totalOrderCount = result3[0][0].sale_id;
+          OrderPageCount = Math.ceil(totalOrderCount / itemPerPage);
+        }
+
+        return {salePageCount:SalePageCount,debtPageCount:DebtPageCount,orderPageCount:OrderPageCount}
 }
 
 exports.getSales = async(req, res, next) => {
@@ -105,6 +118,7 @@ exports.getSales = async(req, res, next) => {
           sales: mainSale,
           sale_page_count:pageCountObj.salePageCount,
           debt_page_count:pageCountObj.debtPageCount,
+          order_page_count:pageCountObj.orderPageCount,
           success:true
         });
     }
@@ -132,6 +146,7 @@ exports.postSale = async(req,res,next) =>{
     const sale_date = req.body.sale_date;
     const debt = req.body.debt;
     const debtors_name = req.body.debtors_name;
+    const order = false;
 
     const itemIds = req.body.items.map(item=>{
         return item.id
@@ -146,7 +161,8 @@ exports.postSale = async(req,res,next) =>{
             sale_date:sale_date,
             total_item_count:total_item_count,
             total_price:total_price,
-            total_selling_price: total_selling_price
+            total_selling_price: total_selling_price,
+            order_ind:order
         });
         //get Sale id after insert
         const saleId = sale.dataValues.id;
@@ -186,6 +202,94 @@ exports.postSale = async(req,res,next) =>{
             items:items,
             sale_page_count:pageCountObj.salePageCount,
             debt_page_count:pageCountObj.debtPageCount,
+            order_page_count:pageCountObj.orderPageCount,
+            success:true
+          });
+
+    }
+    catch(err){
+        console.log(err);
+    }
+
+  }
+
+  exports.postOrder = async(req,res,next) =>{
+
+    const errors = validationResult(req);
+    //console.log(errors.array());
+      if(!errors.isEmpty()){
+        return res.status(422).json({
+        error: errors.array(),
+        success:false
+       });
+    }
+
+    const items = req.body.items;
+    const total_item_count = req.body.total_item_count;
+    const total_selling_price = req.body.total_selling_price;
+    const total_price = req.body.total_price;
+    const sale_date = req.body.sale_date;
+    const debt = req.body.debt;
+    const debtors_name = req.body.debtors_name;
+    const gcash_ref_num = req.body.gcash_ref_num;
+    const order = true;
+
+    const itemIds = req.body.items.map(item=>{
+        return item.id
+    });
+
+
+    try{
+        //create Sale
+        const sale = await Sale.create({
+            debt:debt,
+            debtors_name:debtors_name,
+            sale_date:sale_date,
+            total_item_count:total_item_count,
+            total_price:total_price,
+            total_selling_price: total_selling_price,
+            order_ind:order,
+            gcash_ref_num:gcash_ref_num
+        });
+        //get Sale id after insert
+        const saleId = sale.dataValues.id;
+        //look for items in items table and save it to array
+        let getItems = [];
+        getItems = await Item.findAll({where: {id: itemIds}})
+        //console.log(items[0].id);
+        //update count of each item
+        getItems.forEach(item=>{
+
+            //get item from request payload 
+            const getCurrentItem = items.find(item2=>item2.id===item.id)
+            //console.log(getCurrentItem.id);
+            Item.findByPk(item.id)
+            .then(item2=>{
+                //console.log("table: "+item2.count)
+                const new_count = (item2.count - getCurrentItem.buy_count);
+                //console.log("request new count: "+new_count);
+                item2.count = +new_count;
+                item2.save();
+            })
+            .catch(err=>console.log(err));
+        });
+
+        items.forEach(item => {
+            SaleItem.create({
+                buy_count:item.buy_count,
+                itemId:item.id,
+                saleId:saleId
+            })
+        });
+
+        const pageCountObj = await getSalesPageCount();
+
+        res.status(200).json({
+            id:saleId,
+            items:items,
+            sale_page_count:pageCountObj.salePageCount,
+            debt_page_count:pageCountObj.debtPageCount,
+            order_page_count:pageCountObj.orderPageCount,
             success:true
           });
 
@@ -216,6 +320,7 @@ exports.postSale = async(req,res,next) =>{
         res.status(200).json({
           sale_page_count:pageCountObj.salePageCount,
           debt_page_count:pageCountObj.debtPageCount,
+          order_page_count:pageCountObj.orderPageCount,
           success:true
         });
       });
@@ -249,6 +354,7 @@ exports.postSale = async(req,res,next) =>{
         res.status(200).json({
           sale_page_count:pageCountObj.salePageCount,
           debt_page_count:pageCountObj.debtPageCount,
+          order_page_count:pageCountObj.orderPageCount,
           success:true
         });
       })

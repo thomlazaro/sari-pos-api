@@ -31,6 +31,14 @@ const Sale = sequelize.define('sale',{
     total_selling_price:{
         type: Sequelize.DOUBLE,
         allowNull: false
+    },
+    order_ind:{
+        type: Sequelize.BOOLEAN,
+        allowNull: false
+    },
+    gcash_ref_num:{
+        type: Sequelize.STRING,
+        allowNull: true
     }
 });
 
