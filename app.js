@@ -1,5 +1,6 @@
 //npm modules
 const express = require('express');
+const helmet = require('helmet');
 //routes
 const itemRoutes = require('./routes/item');
 const saleRoutes = require('./routes/sale');
@@ -17,6 +18,8 @@ const app = express();
 
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
 app.use(express.json()); // application/json
+
+app.use(helmet());
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
