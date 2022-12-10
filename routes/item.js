@@ -48,7 +48,7 @@ const validationArray =   [
     ]
 
 // GET /items
-router.get('/',isAuth,itemController.getItems);
+router.get('/',itemController.getItems);
 
 // POST /items
 router.post('/', isAuth,validationArray,itemController.postAddItem);
